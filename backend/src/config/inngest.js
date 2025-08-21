@@ -6,7 +6,7 @@ import { connectDB } from "./db.js";
 export const inngest = new Inngest({ id: "chat-app 2.0" });
 
 const syncUser = inngest.createFunction(
-  { name: "sync-user" },
+  { id: "sync-user" },
   { event:"clerk/user.created" },
   async ({event}) => {
     await connectDB();
@@ -25,7 +25,7 @@ const syncUser = inngest.createFunction(
 );
 
 const deleteUserFromDB = inngest.createFunction(
-  { name: "delete-user-from-db" },
+  { id: "delete-user-from-db" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
     await connectDB();
