@@ -4,10 +4,10 @@ import { User } from "../models/user.model.js"; // Import the User model
 import {  addUserToPublicChannels, deleteStreamUser, upsertStreamUser } from "./stream.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "slack-clone" });
+export const inngest = new Inngest({ id: "chat-app 2.0" });
 
 const syncUser = inngest.createFunction(
-  { id: "sync-user" },
+  { id: "sync-user-function" },
   { event: "clerk/user.created" },
   async ({ event }) => {
     await connectDB();
@@ -34,7 +34,7 @@ const syncUser = inngest.createFunction(
 );
 
 const deleteUserFromDB = inngest.createFunction(
-  { id: "delete-user-from-db" },
+  { id: "delete-user-from-db-function" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
     await connectDB();
