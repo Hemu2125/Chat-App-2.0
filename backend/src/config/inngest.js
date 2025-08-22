@@ -1,26 +1,35 @@
 import { Inngest } from "inngest";
-import { User } from "../models/user.model.js";
 import { connectDB } from "./db.js";
+import { User } from "../models/user.model.js"; // Import the User model
+import {  addUserToPublicChannels, deleteStreamUser, upsertStreamUser } from "./stream.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "chat-app 2.0" });
+export const inngest = new Inngest({ id: "slack-clone" });
 
 const syncUser = inngest.createFunction(
   { id: "sync-user" },
-  { event:"clerk/user.created" },
-  async ({event}) => {
+  { event: "clerk/user.created" },
+  async ({ event }) => {
     await connectDB();
 
-    const {id, email_addresses, first_name, last_name, image_url} = event.data;
+    const { id, email_addresses, first_name, last_name, image_url } = event.data;
 
     const newUser = {
-      clerkId:id,
-      email: email_addresses[0].email_address,
+      clerkId: id,
+      email: email_addresses[0]?.email_address,
       name: `${first_name || ""} ${last_name || ""}`,
-      image: image_url
+      image: image_url,
     };
 
     await User.create(newUser);
+
+    await upsertStreamUser({
+      id: newUser.clerkId.toString(),
+      name: newUser.name,
+      image: newUser.image,
+    });
+
+    await addUserToPublicChannels(newUser.clerkId.toString());
   }
 );
 
@@ -31,7 +40,8 @@ const deleteUserFromDB = inngest.createFunction(
     await connectDB();
     const { id } = event.data;
     await User.deleteOne({ clerkId: id });
-    //await deleteStreamUser(id.toString());
+
+    await deleteStreamUser(id.toString());
   }
 );
 
